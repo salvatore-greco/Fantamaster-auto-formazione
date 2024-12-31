@@ -78,4 +78,4 @@ if __name__ == '__main__':
     auto_lineup.login()
     auto_lineup.get_info()
     auto_lineup.check_lineup_submitted()
-    scraper.driver.quit()
+    auto_lineup.driver.quit()
