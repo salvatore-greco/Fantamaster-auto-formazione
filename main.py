@@ -17,7 +17,9 @@ class AutoLineup:
         load_dotenv()
         self.email = os.getenv('EMAIL')
         self.password = os.getenv('PASSWORD')
-        self.driver = webdriver.Firefox()
+        options = Options()
+        options.add_argument("--headless")
+        self.driver = webdriver.Firefox(options=options)
         self.squad_name = None
         
     def login(self):
