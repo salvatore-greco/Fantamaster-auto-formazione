@@ -7,7 +7,9 @@ from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 import time
 from selenium.webdriver.firefox.options import Options
-
+import requests
+from datetime import datetime, timedelta
+import json
 
 # accetta cookie button class  css-1j32juq
 # submit button class css-edufnu
@@ -21,10 +23,10 @@ class AutoLineup:
         options.add_argument("--headless")
         self.driver = webdriver.Firefox(options=options)
         self.squad_name = None
+        self.api_url = 'https://raw.githubusercontent.com/openfootball/football.json/master/2024-25/it.1.json' 
         
     def login(self):
         self.driver.get('https://leghe.fantamaster.it/login/')
-        
         # Rejecting cookie
         reject_cookie_btn = WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.CLASS_NAME, "qc-cmp2-close-icon")))
         reject_cookie_btn.click()
@@ -80,11 +82,37 @@ class AutoLineup:
             print(e)
             print(self.driver.current_url)
             print(self.league_url)
-    
+
+    def first_match_matchday(self) -> bool:
+        response = requests.get(self.api_url)
+        response = response.json()
+        self.today = datetime.now()
+        date = self.today.date()
+        first_match = []
+        n = 1
+        for i in response['matches']:
+            # matchday_date = date.fromisoformat(i['date'])
+            if i['round'] == f'Matchday {n}':
+                first_match.append(i)
+                n += 1
+        for item in first_match:
+            matchday_date = date.fromisoformat(item['date'])
+            diff = (matchday_date - date).days
+            if diff >= 0 and diff < 10:
+                next_matchday = item
+
+        combined_time = datetime.fromisoformat(next_matchday['date']+' '+next_matchday['time'])
+        due_date = combined_time - timedelta(minutes=30)
+        return due_date
+
 if __name__ == '__main__':
     auto_lineup = AutoLineup()
-    auto_lineup.login()
-    auto_lineup.get_info()
-    auto_lineup.check_lineup_submitted()
-    auto_lineup.driver.quit()
+    due_date = auto_lineup.first_match_matchday()
+    if (due_date - auto_lineup.today) <= timedelta(days=0, hours=0, minutes=30):
+        auto_lineup.login()
+        auto_lineup.get_info()
+        auto_lineup.check_lineup_submitted()
+        auto_lineup.driver.quit()
+    else:
+        print(f'Still {due_date-auto_lineup.today} until due date')
     print('Done')
