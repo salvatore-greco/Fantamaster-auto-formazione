@@ -4,6 +4,7 @@ from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.wait import WebDriverWait
+from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.support import expected_conditions as EC
 import time
 from selenium.webdriver.firefox.options import Options
@@ -36,8 +37,11 @@ class AutoLineup:
     def login(self):
         self.driver.get('https://leghe.fantamaster.it/login/')
         # Rejecting cookie
-        reject_cookie_btn = WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.CLASS_NAME, "qc-cmp2-close-icon")))
-        reject_cookie_btn.click()
+        try:
+            reject_cookie_btn = WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.CLASS_NAME, "qc-cmp2-close-icon")))
+            reject_cookie_btn.click()
+        except TimeoutException:
+            print('Cookie button did not show up, skipping...')
         # Logging in 
         email_form = self.driver.find_element(By.NAME,'email')
         password_form = self.driver.find_element(By.NAME,'password')
@@ -116,6 +120,7 @@ class AutoLineup:
 if __name__ == '__main__':
     auto_lineup = AutoLineup()
     due_date = auto_lineup.first_match_matchday()
+    print(auto_lineup.today)
     if (due_date - auto_lineup.today) <= timedelta(days=0, hours=0, minutes=30):
         auto_lineup.login()
         auto_lineup.get_info()
