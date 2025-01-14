@@ -7,9 +7,11 @@ from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 import time
 from selenium.webdriver.firefox.options import Options
+from selenium.webdriver.firefox.service import Service
 import requests
 from datetime import datetime, timedelta
 import json
+import platform
 
 # accetta cookie button class  css-1j32juq
 # submit button class css-edufnu
@@ -21,7 +23,11 @@ class AutoLineup:
         self.password = os.getenv('PASSWORD')
         options = Options()
         options.add_argument("--headless")
-        self.driver = webdriver.Firefox(options=options)
+        if platform.machine() == 'aarch64':
+            service = Service(executable_path='./geckodriver')
+            self.driver = webdriver.Firefox(options=options, service=service)
+        elif platform.machine() == 'x86_64':
+            self.driver = webdriver.Firefox(options=options)
         self.squad_name = None
         self.api_url = 'https://raw.githubusercontent.com/openfootball/football.json/master/2024-25/it.1.json' 
         
