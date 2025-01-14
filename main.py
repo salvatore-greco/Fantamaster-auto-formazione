@@ -12,6 +12,7 @@ import requests
 from datetime import datetime, timedelta
 import json
 import platform
+from pathlib import Path
 
 # accetta cookie button class  css-1j32juq
 # submit button class css-edufnu
@@ -19,12 +20,13 @@ import platform
 class AutoLineup:
     def __init__(self):
         load_dotenv()
+        path = Path(__file__).absolute().parent
         self.email = os.getenv('EMAIL')
         self.password = os.getenv('PASSWORD')
         options = Options()
         options.add_argument("--headless")
         if platform.machine() == 'aarch64':
-            service = Service(executable_path='./geckodriver')
+            service = Service(executable_path=f'{path}/geckodriver')
             self.driver = webdriver.Firefox(options=options, service=service)
         elif platform.machine() == 'x86_64':
             self.driver = webdriver.Firefox(options=options)
