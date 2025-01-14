@@ -21,19 +21,22 @@ from pathlib import Path
 class AutoLineup:
     def __init__(self):
         load_dotenv()
-        path = Path(__file__).absolute().parent
+        self.path = Path(__file__).absolute().parent
         self.email = os.getenv('EMAIL')
         self.password = os.getenv('PASSWORD')
+        self.squad_name = None
+        self.api_url = 'https://raw.githubusercontent.com/openfootball/football.json/master/2024-25/it.1.json' 
+
+
+    def load_driver(self):
         options = Options()
         options.add_argument("--headless")
         if platform.machine() == 'aarch64':
-            service = Service(executable_path=f'{path}/geckodriver')
+            service = Service(executable_path=f'{self.path}/geckodriver')
             self.driver = webdriver.Firefox(options=options, service=service)
         elif platform.machine() == 'x86_64':
             self.driver = webdriver.Firefox(options=options)
-        self.squad_name = None
-        self.api_url = 'https://raw.githubusercontent.com/openfootball/football.json/master/2024-25/it.1.json' 
-        
+
     def login(self):
         self.driver.get('https://leghe.fantamaster.it/login/')
         # Rejecting cookie
@@ -122,6 +125,7 @@ if __name__ == '__main__':
     due_date = auto_lineup.first_match_matchday()
     print(auto_lineup.today)
     if (due_date - auto_lineup.today) <= timedelta(days=0, hours=0, minutes=30):
+        auto_lineup.load_driver()
         auto_lineup.login()
         auto_lineup.get_info()
         auto_lineup.check_lineup_submitted()
