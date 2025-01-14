@@ -86,9 +86,11 @@ class AutoLineup:
                 EC.presence_of_element_located((By.CLASS_NAME,'css-1puz141'))
                 )
             buttons = div.find_elements(By.TAG_NAME, 'button')
-            buttons[1].click()
+            # buttons[1].click()
+            self.driver.execute_script('arguments[0].click()', buttons[1])
             time.sleep(1)
-            buttons[3].click()
+            self.driver.execute_script('arguments[0].click()', buttons[3])
+            # buttons[3].click()
             WebDriverWait(self.driver, 10).until(
                 EC.presence_of_element_located((By.CLASS_NAME, 'css-13r7n1p'))
             ).click()
