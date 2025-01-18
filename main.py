@@ -14,6 +14,7 @@ from datetime import datetime, timedelta
 import json
 import platform
 from pathlib import Path
+import sys
 
 # accetta cookie button class  css-1j32juq
 # submit button class css-edufnu
@@ -68,7 +69,12 @@ class AutoLineup:
 
     def check_lineup_submitted(self):
         self.driver.get(self.league_url+'/lineups')
-        WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.CLASS_NAME,'css-1bp6795')))
+        try:
+            WebDriverWait(self.driver, 10).until(EC.presence_of_element_located((By.CLASS_NAME,'css-1bp6795')))
+        except TimeoutException as e:
+            print(e)
+            print("Can't find squad names. Exiting...")
+            self.safe_exit()
         squads = self.driver.find_elements(By.CLASS_NAME, 'css-1bp6795') # so che così è sprecone ma bone, mi interessa che prenda tutti gli elementi
         squadsName = set()
         for squad in squads:
@@ -99,6 +105,7 @@ class AutoLineup:
             print(e)
             print(self.driver.current_url)
             print(self.league_url)
+            self.safe_exit()
 
     def first_match_matchday(self) -> bool:
         try:
@@ -130,6 +137,11 @@ class AutoLineup:
             return due_date
         else:
             raise Exception("Something is wrong with API, can't find any match in 10 days from today")
+
+    def safe_exit(self):
+        print("Quitting")
+        self.driver.quit()
+        sys.exit()
 
 if __name__ == '__main__':
     auto_lineup = AutoLineup()
