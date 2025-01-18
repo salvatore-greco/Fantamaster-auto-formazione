@@ -145,8 +145,8 @@ class AutoLineup:
 
 if __name__ == '__main__':
     auto_lineup = AutoLineup()
+    print(datetime.today().date())
     due_date = auto_lineup.first_match_matchday()
-    print(auto_lineup.today)
     if (due_date - auto_lineup.today) <= timedelta(days=0, hours=0, minutes=30):
         auto_lineup.load_driver()
         auto_lineup.login()
