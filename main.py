@@ -101,8 +101,14 @@ class AutoLineup:
             print(self.league_url)
 
     def first_match_matchday(self) -> bool:
-        response = requests.get(self.api_url)
-        response = response.json()
+        try:
+            response = requests.get(self.api_url)
+            response = response.json()
+            with open('schedule.json', 'w') as f:
+                json.dump(response, f)
+        except requests.exceptions.RequestException:
+            with open('schedule.json', 'r') as f:
+                response = json.load(f)
         self.today = datetime.now()
         date = self.today.date()
         first_match = []
@@ -118,9 +124,12 @@ class AutoLineup:
             if diff >= 0 and diff < 10:
                 next_matchday = item
 
-        combined_time = datetime.fromisoformat(next_matchday['date']+' '+next_matchday['time'])
-        due_date = combined_time - timedelta(minutes=30)
-        return due_date
+        if 'next_matchday' in locals():
+            combined_time = datetime.fromisoformat(next_matchday['date']+' '+next_matchday['time'])
+            due_date = combined_time - timedelta(minutes=30)
+            return due_date
+        else:
+            raise Exception("Something is wrong with API, can't find any match in 10 days from today")
 
 if __name__ == '__main__':
     auto_lineup = AutoLineup()
